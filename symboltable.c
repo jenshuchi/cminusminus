@@ -3,12 +3,35 @@
 #include<string.h>
 #include<ctype.h>
 #include<math.h>
+#include<queue>
+#include<vector>
 #include"header.h"
+using std::priority_queue;
+using std::vector;
 
 #define TABLE_SIZE	256
 
 symtab * hash_table[TABLE_SIZE];
 extern int linenumber;
+
+class mycomparison {
+  bool reverse;
+public:
+  mycomparison(const bool& revparam=false)
+    { reverse=revparam; }
+  bool operator() (const symtab* lhs, const symtab* rhs) const
+  {
+    //printf("cmp %s and %s, %d\n", lhs->lexeme, rhs->lexeme, strcmp(lhs->lexeme, rhs->lexeme) );
+    int val = strcmp(lhs->lexeme, rhs->lexeme);
+    if (reverse) {
+      return (val<0) ? true : false; 
+    } else {
+      return (val>0) ? true : false;
+    }
+  }
+};
+
+priority_queue< symtab*, vector<symtab*>, mycomparison> minheap;
 
 int HASH(char * str){
 	int idx=0;
@@ -67,23 +90,31 @@ void insertID(char *name){
 
 void printSym(symtab* ptr) 
 {
-	    printf(" Name = %s \n", ptr->lexeme);
-	    printf(" References = %d \n", ptr->counter);
+  //printf(" Name = %s \n", ptr->lexeme);
+  //printf(" References = %d \n", ptr->counter);
+  printf("%-20s%d\n", ptr->lexeme, ptr->counter);
 }
 
 void printSymTab()
 {
     int i;
-    printf("----- Symbol Table ---------\n");
+    //printf("----- Symbol Table ---------\n");
+    printf("Frenquency of identifiers:\n");
     for (i=0; i<TABLE_SIZE; i++)
     {
         symtab* symptr;
 	symptr = hash_table[i];
 	while (symptr != NULL)
 	{
-            printf("====>  index = %d \n", i);
-	    printSym(symptr);
+	  //printf("====>  index = %d \n", i);
+	    minheap.push(symptr);
+	    //printSym(symptr);
 	    symptr=symptr->front;
 	}
+    }
+
+    while (!minheap.empty()) {
+      printSym(minheap.top());
+      minheap.pop();
     }
 }
