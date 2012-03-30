@@ -1,6 +1,6 @@
 TARGET = scanner
 OBJECT = lex.yy.o symboltable.o 
-CC = cc -g
+CC = c++ -g
 LEX = flex
 LIBS = -lfl 
 
